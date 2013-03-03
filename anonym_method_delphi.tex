@@ -1,4 +1,4 @@
-% Created 2013-03-03 Sun 04:18
+% Created 2013-03-03 Sun 16:28
 \documentclass[11pt]{article}
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
@@ -354,7 +354,7 @@ TRUE TRUE TRUE TRUE
   \href{https://gist.github.com/vkevroletin/5069653}{https://gist.github.com/vkevroletin/5069653} interesting.
 \item Q Where are local variables of anonymous method located?
 
-  A In frame object
+  A On the stack. \st{In frame object}
 \item Q What frame object contains?
 
   A
@@ -362,7 +362,7 @@ TRUE TRUE TRUE TRUE
 \item inherited from TInterfacedObject fields
 \item pointer to parent FrameObject
 \item captured local variables of current function
-\item local variables of anonymous methods created in current function
+\item \st{local variables of anonymous methods created in current       function} \emph{(wrong assumption: local variables allocated on stack)}
 \item things described in next point
 \item may be something else
 \end{itemize}
@@ -558,7 +558,7 @@ neither captured variables not anonymous methods
 
 \href{https://docs.google.com/file/d/0B36IYx_6MNY6N0lmLUlKN1JtVGM/edit?usp=sharing}{https://docs.google.com/file/d/0B36IYx\_6MNY6N0lmLUlKN1JtVGM/edit?usp=sharing}
 
-Here is source code which was used in examples
+Here is source code which was used in examples above
 \href{https://gist.github.com/vkevroletin/5070644}{https://gist.github.com/vkevroletin/5070644}
 
 \end{document}

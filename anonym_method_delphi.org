@@ -296,7 +296,7 @@ TRUE TRUE TRUE TRUE
   
 + Q Where are local variables of anonymous method located?
 
-  A In frame object
+  A On the stack. +In frame object+
   
 + Q What frame object contains?
 
@@ -304,7 +304,8 @@ TRUE TRUE TRUE TRUE
     + inherited from TInterfacedObject fields
     + pointer to parent FrameObject
     + captured local variables of current function
-    + local variables of anonymous methods created in current function
+    + +local variables of anonymous methods created in current
+      function+ /(wrong assumption: local variables allocated on stack)/
     + things described in next point
     + may be something else
   
@@ -496,7 +497,7 @@ neither captured variables not anonymous methods
 
 https://docs.google.com/file/d/0B36IYx_6MNY6N0lmLUlKN1JtVGM/edit?usp=sharing
 
-Here is source code which was used in examples
+Here is source code which was used in examples above
 https://gist.github.com/vkevroletin/5070644
 
 
