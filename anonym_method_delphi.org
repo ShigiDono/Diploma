@@ -296,7 +296,7 @@ TRUE TRUE TRUE TRUE
   
 + Q Where are local variables of anonymous method located?
 
-  A On the stack. +In frame object+
+  A On the stack.
   
 + Q What frame object contains?
 
@@ -304,30 +304,27 @@ TRUE TRUE TRUE TRUE
     + inherited from TInterfacedObject fields
     + pointer to parent FrameObject
     + captured local variables of current function
-    + +local variables of anonymous methods created in current
-      function+ /(wrong assumption: local variables allocated on stack)/
-    + things described in next point
+    + separate VMT for each anonymous methos(see below)
     + may be something else
-  
+
 + Q Does reference to function contains 2 pointers. First pointer
   for object and second for code ?
  
   A No. It consists of single pointer.
 
-  /things described below are obtained by exploring
-   assembler code; results are strange so may be there is a mistake/
-  Single pointer is enough for object which have only one method. But
-  frame object can have many methods. And reference to procedure
-  doesn't point to FrameObject. It points to structure which have
-  reference to FrameObject and to code. Let's call it the "proxy"
-  object. "Proxy" is located in body of FrameObject.
+  Frame object may contains many methods. Pointer to method should 
+  contain 2 pointers.
+  But single pointer is enough for interface VMT. If interface contains
+  only 1 function then there is no need to store pointer to method.
+  Frame object implements separate interface for each anonymous
+  method. Reference to anonymous method is reference to interface
+  which contains single method.
 
 + Q Does (procedure begin end)() works?
 
   A No. This compiles, but in runtime you will get
    runtime error 216
    Access violation  
-
 
 * Examples of how anonymous methods can be implemented 
 
