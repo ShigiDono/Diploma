@@ -1,0 +1,330 @@
+\documentclass[roman,12pt]{beamer}
+\usepackage[english,russian]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage{booktabs}
+\usepackage{dcolumn}
+%\usepackage[dvips]{graphicx}
+\usepackage{color}
+\usepackage{listings}
+\lstset{language=C,
+numberstyle=\footnotesize,
+basicstyle=\ttfamily\footnotesize,
+numbers=left,
+stepnumber=1,
+breaklines=true}
+
+% Стиль презентации
+\usetheme{Warsaw}
+
+\newenvironment{changemargin}[2]{%
+  \begin{list}{}{%
+    \setlength{\topsep}{0pt}%
+    \setlength{\leftmargin}{#1}%
+    \setlength{\rightmargin}{#2}%
+    \setlength{\listparindent}{\parindent}%
+    \setlength{\itemindent}{\parindent}%
+    \setlength{\parsep}{\parskip}%
+  }%
+  \item[]}{\end{list}} 
+
+\newcommand\Fontvi{\fontsize{11}{14}\selectfont}
+
+\makeatletter
+\defbeamertemplate*{footline}{my theme}{
+    \leavevmode%
+    \hbox{%
+%    \begin{beamercolorbox}[wd=.3\paperwidth,ht=2.25ex,dp=1ex,center]{author in head/foot}%
+%        \usebeamerfont{author in head/foot}%
+%        {РЭК-2013}
+%    \end{beamercolorbox}%
+%    \begin{beamercolorbox}[wd=.5\paperwidth,ht=2.25ex,dp=1ex,center]{title in head/foot}%
+%        \usebeamerfont{title in head/foot}{Кевролетин В.В.}
+%    \end{beamercolorbox}%
+    \begin{beamercolorbox}[wd=15.ex,ht=2.25ex,dp=1ex,right]{date in head/foot}%
+%        \usebeamerfont{date in head/foot}2013{}\hspace*{2em}
+        \insertframenumber{} / \inserttotalframenumber\hspace*{2ex}
+    \end{beamercolorbox}}%
+}
+\makeatother
+\begin{document}
+\title{Доработка языка программирования Freepascal: реализация замыканий.}  
+\author{Выполнил студент группы с8503а \\ Кевролетин Василий
+  Владимирович\\ Руководитель: старший преподаватель кафедры
+  информатики, математического и компьютерного моделирования Кленин
+  Александр Сергеевич}
+\institute{Дальневосточный Федеральный университет\\2013г.}
+
+\begin{frame}
+\begin{center}
+\includegraphics[scale=0.15]{logo.jpeg}
+\end{center}
+\maketitle
+
+\end{frame}
+
+\begin{frame}{Freepascal}
+  \begin{block}{Технические особенности проекта}
+    \begin{itemize}
+    \item Поддержка большого числа процессоров.
+    \item Поддержка большого числа операционных систем.
+    \item Поддержка нескольких диалектов Pascal.
+    \end{itemize}
+  \end{block}
+  \begin{block}{Организационные особенности проекта}
+    \begin{itemize}
+    \item Открытый исходный код.
+    \item Разрабатывается постоянной командой добровольцев.
+    \item Принимает доработки от сторонних разработчиков.
+    \end{itemize}  
+  \end{block}
+\end{frame}
+
+\begin{frame}{Этапы компиляции: часть 1}
+ \begin{block}{Лексический анализ}
+   поток символов $\rightarrow$ поток лексем
+ \end{block}
+ \begin{block}{Синтаксический анализ}
+   поток символов $\rightarrow$ АСТ, таблицы символов
+ \end{block}
+ \begin{block}{Семантический анализ}
+   проверка соответствия типов
+ \end{block}
+ \begin{block}{Высокоуровневая оптимизация}
+ \end{block}
+ \begin{block}{Генерация кода}
+   АСТ $\rightarrow$ машинный код*
+ \end{block}
+ \begin{block}{Низкоуровневая оптимизация}
+   машинный код $\rightarrow$ машинный код
+ \end{block}
+\end{frame}
+
+\begin{frame}{Этапы компиляции: часть 2}
+ \begin{block}{Компиляция модуля}
+   SomeUnit.pas \\
+   $\ \ \ \rightarrow$ SomeUnit.ppu - таблицы символов\\
+   $\ \ \ \rightarrow$ SomeUnit.o $\ \ $  - объектный код
+ \end{block}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Анонимной функции}
+  \begin{block}{Пример}
+    \begin{lstlisting}
+procedure Factory: TProc;
+begin
+  Result := procedure
+            begin
+              Writeln;
+            end;
+end;
+    \end{lstlisting}
+  \end{block} 
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Вложенной функции}
+  
+  \begin{block}{Пример}
+    \begin{lstlisting}    
+procedure outer;
+var i: Integer;
+
+  procedure inner; begin
+    i := 10;
+  end;
+
+begin
+  ...
+end;    
+    \end{lstlisting}
+  \end{block} 
+
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Замыкание}
+  \begin{block}{Пример. Продление жизни локальных переменных.}
+    \begin{lstlisting}
+    procedure Factory(data: Integer): TProc;
+    begin
+      Result := procedure
+                begin
+                  Writeln( data );
+                end;
+    end;
+    
+    var f1: TProc;
+    begin
+      f1 := Factory(10);
+      f2 := Factory(20);
+      f1();               { 10 }
+      f2();               { 20 }
+    end;    
+    \end{lstlisting}    
+  \end{block} 
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Захват по ссылке}
+  \begin{block}{Пример}
+    \begin{lstlisting}
+var i: Integer;
+    f: TProc;
+begin
+  i := 0;
+  f := procedure
+       begin
+         Writeln(i);
+       end;
+  i := 10;
+  f();                { 10 }
+end;
+    \end{lstlisting}    
+ \end{block} 
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Захват по значению}
+ \begin{block}{Пример}
+    \begin{lstlisting}
+int main()
+{
+  int i = 0;
+  auto f = [=] { std::cout << i; };
+  i = 10;
+  f();             /* 0 */
+}   
+    \end{lstlisting}
+  \end{block} 
+\end{frame}
+  
+\begin{frame}[fragile]
+  \frametitle{Анонимные функции без замыканий}
+ \begin{block}{Пример}
+   \begin{lstlisting}
+std::function<void(void)> factory(int data) {
+  return [&data] { std::cout << data << "\n"; };
+}
+
+int main()
+{
+  auto f1 = factory(10);
+  auto f2 = factory(20);
+  f1();                      /* 20 */
+  f2();                      /* 20 */
+}
+   \end{lstlisting}
+ \end{block} 
+
+g++ version 4.7.2, \\
+command-lin g++ -std=gnu++0x main.cpp
+ 
+\end{frame}
+
+
+\begin{frame}{Реализация замыканий в современных ЯП}
+\Fontvi
+\begin{changemargin}{-1cm}{0cm} 
+
+\begin{table}
+\begin{tabular}{|c |c |c |c |c |c |}
+\hline
+ЯП & анонимные & вложенные & захват по & захват по & замыкания  \\
+   & функции   & функции   & значению  & ссылке    &            \\
+\hline
+Perl       & + & +/- &   & + & + \\
+Python     & + & + &   & + & + \\
+Ruby       & + & + &   & + & + \\
+\hline
+Scheme      & + & + &   & + & + \\
+Elisp      & + & + &   & + &   \\
+\hline
+C          &   &   &   &   &   \\
+C++        & + &   & + & + &   \\
+Delphi     & + & + &   & + & + \\
+fpc        &   & + &   &   &   \\
+\hline
+\end{tabular}
+\end{table}
+
+\end{changemargin}
+
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Анонимные методы Delphi}
+ \begin{block}{Пример}
+   \begin{lstlisting}
+type TProc = reference to procedure;
+
+var
+  p : TProc;
+  i : Integer;
+
+begin
+  i := 10;
+  p := procedure begin
+    Writeln(i)
+  end;
+  p();
+end.
+   \end{lstlisting}
+ \end{block} 
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Шаг 1}
+ \begin{block}{Объявление нового класса}
+   \begin{lstlisting}
+type
+  TFrameObject = class (TInterfacedObject)
+    i : Integer;
+    procedure Proc;
+  end;
+
+procedure TFrameObject.Proc;
+begin
+  Writeln(Self.i);
+end;
+   \end{lstlisting}
+ \end{block} 
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Шаг 2}
+ \begin{block}{Создание объекта}
+   \begin{lstlisting}
+var
+  p : procedure of object;
+  frameObj: TFrameObject;
+
+begin
+  frameObj := TFrameObject.Create;
+
+  frameObj.i := 10;
+  p := @frameObj.Proc;
+  p();
+end.
+   \end{lstlisting}
+ \end{block} 
+\end{frame}
+
+\begin{frame}{Итог}
+   \begin{block}{Проделанная работа}
+     \begin{itemize}
+     \item Изучена предметная область.
+     \item Изучено внутреннее устройство компилятора fpc.
+     \item Получено согласие разработчиков на совместимую с Delphi реализацию.
+     \end{itemize}
+   \end{block} 
+   \begin{block}{План реализации}
+     \begin{itemize}
+     \item Совместимая с Delphi реализация.
+     \item Возможность захвата переменных по значению.
+     \item Согласование и реализация упрощенного синтаксиса.
+     \end{itemize}
+   \end{block} 
+\end{frame}
+
+\end{document}
