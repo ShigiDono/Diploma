@@ -47,7 +47,7 @@ breaklines=true}
 }
 \makeatother
 \begin{document}
-\title{Доработка языка программирования Freepascal: реализация замыканий.}  
+\title{Доработка языка программирования Freepascal: реализация замыканий}  
 \author{Выполнил студент группы с8503а \\ Кевролетин Василий
   Владимирович\\ Руководитель: старший преподаватель кафедры
   информатики, математического и компьютерного моделирования Кленин
@@ -79,54 +79,27 @@ breaklines=true}
   \end{block}
 \end{frame}
 
-\begin{frame}{Этапы компиляции: часть 1}
- \begin{block}{Лексический анализ}
-   поток символов $\rightarrow$ поток лексем
- \end{block}
- \begin{block}{Синтаксический анализ}
-   поток символов $\rightarrow$ АСТ, таблицы символов
- \end{block}
- \begin{block}{Семантический анализ}
-   проверка соответствия типов
- \end{block}
- \begin{block}{Высокоуровневая оптимизация}
- \end{block}
- \begin{block}{Генерация кода}
-   АСТ $\rightarrow$ машинный код*
- \end{block}
- \begin{block}{Низкоуровневая оптимизация}
-   машинный код $\rightarrow$ машинный код
- \end{block}
-\end{frame}
-
-\begin{frame}{Этапы компиляции: часть 2}
- \begin{block}{Компиляция модуля}
-   SomeUnit.pas \\
-   $\ \ \ \rightarrow$ SomeUnit.ppu - таблицы символов\\
-   $\ \ \ \rightarrow$ SomeUnit.o $\ \ $  - объектный код
- \end{block}
-\end{frame}
-
 \begin{frame}[fragile]
-  \frametitle{Анонимной функции}
+  \frametitle{Анонимные функции}
   \begin{block}{Пример}
-    \begin{lstlisting}
-procedure Factory: TProc;
+\begin{lstlisting}
+function Factory: TProc;
 begin
   Result := procedure
             begin
               Writeln;
             end;
 end;
-    \end{lstlisting}
+\end{lstlisting}
+
   \end{block} 
 \end{frame}
 
 \begin{frame}[fragile]
-  \frametitle{Вложенной функции}
+  \frametitle{Вложенные функции}
   
   \begin{block}{Пример}
-    \begin{lstlisting}    
+\begin{lstlisting}    
 procedure outer;
 var i: Integer;
 
@@ -137,38 +110,38 @@ var i: Integer;
 begin
   ...
 end;    
-    \end{lstlisting}
+\end{lstlisting}
   \end{block} 
 
 \end{frame}
 
 \begin{frame}[fragile]
-  \frametitle{Замыкание}
+  \frametitle{Замыкания}
   \begin{block}{Пример. Продление жизни локальных переменных.}
-    \begin{lstlisting}
-    procedure Factory(data: Integer): TProc;
-    begin
-      Result := procedure
-                begin
-                  Writeln( data );
-                end;
-    end;
+\begin{lstlisting}
+function Factory(data: Integer): TProc;
+begin
+  Result := procedure
+            begin
+              Writeln( data );
+            end;
+  end;
     
-    var f1: TProc;
-    begin
-      f1 := Factory(10);
-      f2 := Factory(20);
-      f1();               { 10 }
-      f2();               { 20 }
-    end;    
-    \end{lstlisting}    
+var f1: TProc;
+begin
+  f1 := Factory(10);
+  f2 := Factory(20);
+  f1();               { 10 }
+  f2();               { 20 }
+end.
+\end{lstlisting}    
   \end{block} 
 \end{frame}
 
 \begin{frame}[fragile]
   \frametitle{Захват по ссылке}
   \begin{block}{Пример}
-    \begin{lstlisting}
+\begin{lstlisting}
 var i: Integer;
     f: TProc;
 begin
@@ -179,8 +152,8 @@ begin
        end;
   i := 10;
   f();                { 10 }
-end;
-    \end{lstlisting}    
+end.
+\end{lstlisting}
  \end{block} 
 \end{frame}
 
@@ -227,25 +200,37 @@ command-lin g++ -std=gnu++0x main.cpp
 \Fontvi
 \begin{changemargin}{-1cm}{0cm} 
 
-\begin{table}
-\begin{tabular}{|c |c |c |c |c |c |}
+\begin{table}[h!]
+\begin{center}
+\begin{tabular}{|l|c|c|c|c|c|}
 \hline
-ЯП & анонимные & вложенные & захват по & захват по & замыкания  \\
-   & функции   & функции   & значению  & ссылке    &            \\
+  ЯП     &  Анонимные  &  Вложенные  &  Захват по  &  Захват по  &  Замыкания  \\
+         &  функции    &  функции    &  значению   &  ссылке     &             \\
 \hline
-Perl       & + & +/- &   & + & + \\
-Python     & + & + &   & + & + \\
-Ruby       & + & + &   & + & + \\
+ Perl    &  +          &  +/-        &             &  +          &  +          \\
 \hline
-Scheme      & + & + &   & + & + \\
-Elisp      & + & + &   & + &   \\
+ Python  &  +          &  +          &             &  +          &  +          \\
 \hline
-C          &   &   &   &   &   \\
-C++        & + &   & + & + &   \\
-Delphi     & + & + &   & + & + \\
-fpc        &   & + &   &   &   \\
+ Ruby    &  +          &  +          &             &  +          &  +          \\
+\hline
+ Scheme  &  +          &  +          &             &  +          &  +          \\
+\hline
+ Elisp   &  +          &  +          &             &  +          &             \\
+\hline
+ Scala   &  +          &  +          &             &  +          &  +          \\
+\iffalse \hline
+ Java    &  ?          &  ?          &  ?          &  ?          &  ?          \\ \fi
+\hline
+ C       &             &             &             &             &             \\
+\hline
+ C++     &  +          &             &  +          &  +          &             \\
+\hline
+ Delphi  &  +          &  +          &             &  +          &  +          \\
+\hline
+ Fpc     &             &  +          &             &             &             \\
 \hline
 \end{tabular}
+\end{center}
 \end{table}
 
 \end{changemargin}
@@ -315,14 +300,9 @@ end.
      \begin{itemize}
      \item Изучена предметная область.
      \item Изучено внутреннее устройство компилятора fpc.
-     \item Получено согласие разработчиков на совместимую с Delphi реализацию.
-     \end{itemize}
-   \end{block} 
-   \begin{block}{План реализации}
-     \begin{itemize}
-     \item Совместимая с Delphi реализация.
-     \item Возможность захвата переменных по значению.
-     \item Согласование и реализация упрощенного синтаксиса.
+     \item Проделана пробная реализация. Предоставленный разработчикам
+       патч содержит 1255 добавленных строк кода, 812 удалённых строк.
+Так же добавлено 20 тестов общим объёмом 504 строки.
      \end{itemize}
    \end{block} 
 \end{frame}
