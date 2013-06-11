@@ -1,5 +1,5 @@
 \NeedsTeXFormat{LaTeX2e}
-\ProvidesClass{imcs}[2012/05/24 IMCS diploma report style]
+\ProvidesClass{imcs}[2013/05/24 IMCS diploma report style]
 \LoadClass[14pt,a4paper]{extarticle}
 \RequirePackage{fancyhdr}
 \RequirePackage[T2A]{fontenc}
@@ -90,7 +90,7 @@
             \small
             \superunder{\hrulefill}{\hspace{1cm}(подпись)\hspace{1cm}}\hfill\superunder{\small\@mentorname}{\hspace{0.5cm}(и.о.ф)}\\
             &
-            <<\rule{1cm}{0.5pt}>>\rule{2.5cm}{0.5pt}\quad 2012г.\\
+            <<\rule{1cm}{0.5pt}>>\rule{2.5cm}{0.5pt}\quad 2013г.\\
             &\\
             \small
             Защищена в ГАК с оценкой \rule{3cm}{0.5pt} 
@@ -103,8 +103,8 @@
                 \superunder{\hrulefill}{\hspace{1cm}(подпись)\hspace{1cm}} \hfill
                 \superunder{\smallА.~Ю.~Чеботарев}{\hspace{0.5cm}(и.о.ф.)}\\
             \small
-            <<\rule{1cm}{0.5pt}>>\rule{3cm}{0.5pt}\quad 2012 г. 
-                & \small <<\rule{1cm}{0.5pt}>>\rule{2.5cm}{0.5pt}\quad 2012 г.
+            <<\rule{1cm}{0.5pt}>>\rule{3cm}{0.5pt}\quad 2013 г. 
+                & \small <<\rule{1cm}{0.5pt}>>\rule{2.5cm}{0.5pt}\quad 2013 г.
         \end{tabular}
         \vfill
         \centerline{\footnotesize г. Владивосток}
