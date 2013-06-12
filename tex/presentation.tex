@@ -5,13 +5,48 @@
 \usepackage{dcolumn}
 %\usepackage[dvips]{graphicx}
 \usepackage{color}
-\usepackage{listings}
-\lstset{language=C,
-numberstyle=\footnotesize,
+\usepackage{listings,xcolor}
+\usepackage{tikz}
+
+
+\makeatletter
+\newenvironment{btHighlight}[1][]
+{\begingroup\tikzset{bt@Highlight@par/.style={#1}}\begin{lrbox}{\@tempboxa}}
+{\end{lrbox}\bt@HL@box[bt@Highlight@par]{\@tempboxa}\endgroup}
+
+\newcommand\btHL[1][]{%
+  \begin{btHighlight}[#1]\bgroup\aftergroup\bt@HL@endenv%
+}
+\def\bt@HL@endenv{%
+  \end{btHighlight}%   
+  \egroup
+}
+\newcommand{\bt@HL@box}[2][]{%
+  \tikz[#1]{%
+    \pgfpathrectangle{\pgfpoint{1pt}{0pt}}{\pgfpoint{\wd #2}{\ht #2}}%
+    \pgfusepath{use as bounding box}%
+    \node[anchor=base west, fill=orange!30,outer sep=0pt,inner xsep=1pt, inner ysep=0pt, rounded corners=3pt, minimum height=\ht\strutbox+1pt,#1]{\raisebox{1pt}{\strut}\strut\usebox{#2}};
+  }%
+}
+\makeatother
+
+\lstdefinestyle{SQL}{
+    language={SQL},basicstyle=\ttfamily, 
+    moredelim=**[is][\btHL]{`}{`},
+    moredelim=**[is][{\btHL[fill=green!30,draw=red,dashed,thin]}]{@}{@},
+}
+\lstloadlanguages{Pascal, C++}
+
+\lstset{
 basicstyle=\ttfamily\footnotesize,
-numbers=left,
 stepnumber=1,
-breaklines=true}
+breaklines=true,
+language=Pascal,
+numbers=left,
+numberstyle=\tiny,
+%columns=fullflexible,
+showstringspaces=false,
+}
 
 % Стиль презентации
 \usetheme{Warsaw}
@@ -47,7 +82,7 @@ breaklines=true}
 }
 \makeatother
 \begin{document}
-\title{Доработка языка программирования Freepascal: реализация замыканий}  
+\title{Доработка языка программирования Free~Pascal: реализация замыканий}  
 \author{Выполнил студент группы с8503а \\ Кевролетин Василий
   Владимирович\\ Руководитель: старший преподаватель кафедры
   информатики, математического и компьютерного моделирования Кленин
@@ -80,6 +115,65 @@ breaklines=true}
 \end{frame}
 
 \begin{frame}[fragile]
+  \frametitle{Понятие замыкания}
+  
+\iffalse 
+
+
+\begin{columns}[c]
+\column{2.2in}
+
+  \begin{block}{Объявление класса}
+
+\begin{lstlisting}[basicstyle=\scriptsize]
+type TAccum = class
+ value: Integer;
+ constructor Create;
+ function Inc(n: Integer): Integer;
+end;
+constructor TAccum.Create;
+begin
+ value := 0;
+end;
+function TAccum.Inc(n: Integer): Integer;
+begin
+ value := value + n;
+ Result := value;
+end;
+\end{lstlisting}
+
+  \end{block}
+
+
+\column{2.2in}
+
+ \fi
+
+\begin{block}{Пример замыкания}
+
+\begin{lstlisting}
+type
+ TAccum=reference to function(n:Integer):Integer;
+
+function MakeAccumulator: TAccum;
+var value: Integer;
+begin
+ value := 0;
+ result := function(n: Integer): Integer begin
+             value  := value + n;
+             result := value;
+           end;
+end;
+\end{lstlisting}
+
+
+\end{block}
+
+%\end{columns}  
+  
+\end{frame}
+
+\begin{frame}[fragile]
   \frametitle{Анонимные функции}
   \begin{block}{Пример}
 \begin{lstlisting}
@@ -87,7 +181,7 @@ function Factory: TProc;
 begin
   Result := procedure
             begin
-              Writeln;
+              Writeln('executed');
             end;
 end;
 \end{lstlisting}
@@ -143,15 +237,20 @@ end.
   \begin{block}{Пример}
 \begin{lstlisting}
 var i: Integer;
-    f: TProc;
+    fSet: TIntProc;
+    fWrite: TProc;
 begin
   i := 0;
-  f := procedure
-       begin
-         Writeln(i);
-       end;
+  fSet := procedure(n: Integer) begin
+            i := n;
+          end;
+  fWrite := procedure begin
+              Writeln(i);
+            end;
   i := 10;
-  f();                { 10 }
+  fWrite();           { 10 }
+  fSet(20);    
+  fWrite();           { 20 }
 end.
 \end{lstlisting}
  \end{block} 
@@ -160,7 +259,7 @@ end.
 \begin{frame}[fragile]
   \frametitle{Захват по значению}
  \begin{block}{Пример}
-    \begin{lstlisting}
+    \begin{lstlisting}[language=c++]
 int main()
 {
   int i = 0;
@@ -172,30 +271,6 @@ int main()
   \end{block} 
 \end{frame}
   
-\begin{frame}[fragile]
-  \frametitle{Анонимные функции без замыканий}
- \begin{block}{Пример}
-   \begin{lstlisting}
-std::function<void(void)> factory(int data) {
-  return [&data] { std::cout << data << "\n"; };
-}
-
-int main()
-{
-  auto f1 = factory(10);
-  auto f2 = factory(20);
-  f1();                      /* 20 */
-  f2();                      /* 20 */
-}
-   \end{lstlisting}
- \end{block} 
-
-g++ version 4.7.2, \\
-command-lin g++ -std=gnu++0x main.cpp
- 
-\end{frame}
-
-
 \begin{frame}{Реализация замыканий в современных ЯП}
 \Fontvi
 \begin{changemargin}{-1cm}{0cm} 
@@ -204,8 +279,8 @@ command-lin g++ -std=gnu++0x main.cpp
 \begin{center}
 \begin{tabular}{|l|c|c|c|c|c|}
 \hline
-  ЯП     &  Анонимные  &  Вложенные  &  Захват по  &  Захват по  &  Замыкания  \\
-         &  функции    &  функции    &  значению   &  ссылке     &             \\
+  ЯП     &  Анонимные  &  Вложенные  &  Захват по  &  Захват по  & Замыка- \\
+         &  функции    &  функции    &  значению   &  ссылке     & ния     \\
 \hline
  Perl    &  +          &  +/-        &             &  +          &  +          \\
 \hline
@@ -215,15 +290,15 @@ command-lin g++ -std=gnu++0x main.cpp
 \hline
  Scheme  &  +          &  +          &             &  +          &  +          \\
 \hline
- Elisp   &  +          &  +          &             &  +          &             \\
+ Elisp   &  +          &  +          &             &  +/-        &             \\
 \hline
  Scala   &  +          &  +          &             &  +          &  +          \\
-\iffalse \hline
- Java    &  ?          &  ?          &  ?          &  ?          &  ?          \\ \fi
+\hline
+ Java    &             &             &             &  +          &  +/-        \\
 \hline
  C       &             &             &             &             &             \\
 \hline
- C++     &  +          &             &  +          &  +          &             \\
+ C++     &  +          &             &  +          &  +/-        &  +          \\
 \hline
  Delphi  &  +          &  +          &             &  +          &  +          \\
 \hline
@@ -238,43 +313,397 @@ command-lin g++ -std=gnu++0x main.cpp
 \end{frame}
 
 \begin{frame}[fragile]
-  \frametitle{Анонимные методы Delphi}
- \begin{block}{Пример}
+  \frametitle{Сложности управления памятью}
+ \begin{block}{Несколько замыканий захватили одну переменную}
    \begin{lstlisting}
-type TProc = reference to procedure;
-
-var
-  p : TProc;
-  i : Integer;
-
+var i : Integer;
 begin
-  i := 10;
-  p := procedure begin
-    Writeln(i)
-  end;
-  p();
+  p1 := procedure begin Inc(i); end;
+  p2 := procedure begin Dec(i); end;
 end.
    \end{lstlisting}
- \end{block} 
+  \end{block}
+ \begin{block}{Замыкание -- фактический параметр функции}
+   \begin{lstlisting}
+  mapContainer.ForEach( procedure(key,val:String)
+                        begin
+                          sum := sum + val;
+                        end );
+                         
+    \end{lstlisting}
+  \end{block}
+\end{frame}
+
+% analize capture
+\begin{frame}[fragile]
+  \frametitle{Выявление захваченных переменных}
+  \begin{columns}[c]
+    \column{2.2in}
+      \begin{lstlisting}[escapechar=@,basicstyle=\scriptsize]
+type 
+  TProc = reference to
+          procedure;
+
+var d1, d2: Integer;
+    p: TProc;
+
+begin
+
+  @{\color{red}\bf d1}@ := 0;
+  @{\color{red}\bf d2}@ := 0;
+  p := procedure begin
+         Inc(d1);
+         Dec(d2);
+       end;
+  p;
+end.
+     \end{lstlisting}
+   \column{2.2in}
+  \end{columns}
+\end{frame}
+
+% create capture
+\begin{frame}[fragile]
+  \frametitle{Создание хранилища}
+  \begin{columns}[c]
+    \column{2.2in}
+     \begin{lstlisting}[escapechar=@,basicstyle=\scriptsize]
+type
+  TProc = reference to
+          procedure;
+
+var d1, d2: Integer;
+    p: TProc;
+    @{\color{red}\bf store: TStore;}@
+begin
+  @{\color{red}\bf store := TStore.Create; }@
+  @{\color{blue}\bf d1}@ := 0;
+  @{\color{blue}\bf d2}@ := 0;
+  p := procedure begin
+         Inc(d1);
+         Dec(d2);
+       end;
+  p;
+end.
+     \end{lstlisting}
+   \column{2.2in}
+     \begin{lstlisting}[escapechar=@,basicstyle=\scriptsize]  
+type
+
+
+
+
+  @{\color{red}\bf TStore}@ = class
+    d1: Integer;
+    d2: Integer;
+  end;
+
+
+
+
+
+
+
+//
+
+     \end{lstlisting}
+
+  \end{columns}
 \end{frame}
 
 \begin{frame}[fragile]
-  \frametitle{Шаг 1}
- \begin{block}{Объявление нового класса}
-   \begin{lstlisting}
+  \frametitle{Перенаправление доступа в исходной функции}
+  \begin{columns}[c]
+    \column{2.2in}
+     \begin{lstlisting}[escapechar=@,basicstyle=\scriptsize]
 type
-  TFrameObject = class (TInterfacedObject)
-    i : Integer;
-    procedure Proc;
+  TProc = reference to
+          procedure;
+
+var d1, d2: Integer;
+    p: TProc;
+    store: TStore;
+begin
+  store := TStore.Create;
+  @{\color{red}\bf store}@.d1 := 0;
+  @{\color{red}\bf store}@.d2 := 0;
+  p := procedure begin
+         Inc(d1);
+         Dec(d2);
+       end;
+  p;
+end.
+     \end{lstlisting}
+   \column{2.2in}
+     \begin{lstlisting}[escapechar=@,basicstyle=\scriptsize]  
+type
+
+
+
+
+
+  TStore = class
+    d1: Integer;
+    d2: Integer;
+  end
+
+
+
+
+
+
+//
+     \end{lstlisting}
+
+  \end{columns}
+\end{frame}
+
+% create method of capture
+\begin{frame}[fragile]
+  \frametitle{Модификация анонимной функции}
+  \begin{columns}[c]
+    \column{2.2in}
+     \begin{lstlisting}[escapechar=@,basicstyle=\scriptsize]
+type 
+  TProc = reference to
+          procedure;
+
+var d1, d2: Integer;
+    p: TProc;
+    store: TStore;
+begin
+  store := TStore.Create;
+  store.d1 := 0;
+  store.d2 := 0;
+  p := procedure begin
+         @{\color{blue}\bf Inc(d1);}@
+         @{\color{blue}\bf Dec(d2);}@
+       end;
+  p;
+end.
+     \end{lstlisting}
+   \column{2.2in}
+     \begin{lstlisting}[escapechar=@,basicstyle=\scriptsize]  
+type
+
+
+
+
+
+  TStore = class
+    d1: Integer;
+    d2: Integer;
+    @{\color{red}procedure Anonymous;}@
+  end
+  
+procedure TStore.@{\color{red}Anonymous;}@
+begin
+  @{\color{blue}\bf Inc(d1);}@
+  @{\color{blue}\bf Dec(d2);}@
+end;
+
+     \end{lstlisting}
+
+  \end{columns}
+\end{frame}
+
+% move access inside method
+\begin{frame}[fragile]
+  \frametitle{Перенаправление доступа в анонимной функции}
+  \begin{columns}[c]
+    \column{2.2in}
+     \begin{lstlisting}[escapechar=@,basicstyle=\scriptsize]
+type 
+  TProc = reference to
+          procedure;
+
+var d1, d2: Integer;
+    p: TProc;
+    store: TStore;
+begin
+  store := TStore.Create;
+  store.d1 := 0;
+  store.d2 := 0;
+  p := procedure begin
+         Inc(d1);
+         Dec(d2);
+       end;
+  p;
+end.
+     \end{lstlisting}
+   \column{2.2in}
+     \begin{lstlisting}[escapechar=@,basicstyle=\scriptsize]  
+type
+
+
+
+
+
+  TStore = class
+    d1: Integer;
+    d2: Integer;
+    procedure Anonymous;
+  end
+  
+procedure TStore.Anonymous;
+begin
+  Inc(@{\color{red}\bf self}@.d1);
+  Dec(@{\color{red}\bf self}@.d2);
+end;
+
+     \end{lstlisting}
+
+  \end{columns}
+\end{frame}
+
+% move access inside method
+\begin{frame}[fragile]
+  \frametitle{Замыкание -- указатель на метод?}
+  \begin{columns}[c]
+    \column{2.2in}
+     \begin{lstlisting}[escapechar=*,basicstyle=\scriptsize]
+type
+  TProc = *{\color{red}\bf procedure of object;}*
+
+
+var d1, d2: Integer;
+    p: TProc;
+    store: TStore;
+begin
+  store := TStore.Create;
+  store.d1 := 0;
+  store.d2 := 0;
+  p := *{\color{red}\bf @store.Anonymous}*;
+
+
+
+  p();
+end.
+     \end{lstlisting}
+   \column{2.2in}
+     \begin{lstlisting}[escapechar=@,basicstyle=\scriptsize]  
+type
+
+
+
+
+
+  TStore = class
+    d1: Integer;
+    d2: Integer;
+    procedure Anonymous;
+  end
+  
+procedure TStore.Anonymous;
+begin
+  Inc(self.d1);
+  Dec(self.d2);
+end;
+
+     \end{lstlisting}
+
+  \end{columns}
+\end{frame}
+
+% interface
+\begin{frame}[fragile]
+  \frametitle{Замыкание -- указатель на интерфейс}
+  \begin{columns}[c]
+    \column{2.2in}
+     \begin{lstlisting}[escapechar=*,basicstyle=\scriptsize]
+type
+  TProc = reference to
+          procedure;
+
+var d1, d2: Integer;
+    p: TProc;
+    store: TStore;
+begin
+  store := TStore.Create;
+  store.d1 := 0;
+  store.d2 := 0;
+  p := @store.Anonymous;
+
+
+
+  p();
+end.
+     \end{lstlisting}
+   \column{2.2in}
+     \begin{lstlisting}[escapechar=*,basicstyle=\scriptsize]  
+type
+
+  *{\color{red}\bf TClosureIntf}* = interface
+    procedure *{\color{blue}\bf Anonymous}*;
   end;
 
-procedure TFrameObject.Proc;
+  TStore = class(TClosureIntf)
+    d1: Integer;
+    d2: Integer;
+    procedure *{\color{blue}\bf Anonymous}*;
+  end
+  
+procedure TStore.Anonymous;
 begin
-  Writeln(Self.i);
+  Inc(self.d1);
+  Dec(self.d2);
 end;
-   \end{lstlisting}
- \end{block} 
+
+     \end{lstlisting}
+
+  \end{columns}
 \end{frame}
+
+% interface2
+\begin{frame}[fragile]
+  \frametitle{Вызов замыкания}
+  \begin{columns}[c]
+    \column{2.2in}
+     \begin{lstlisting}[escapechar=*,basicstyle=\scriptsize]
+type 
+  TProc = interface
+    procedure *{\color{blue}\bf Apply}*;
+  end;
+var d1, d2: Integer;
+    p: TProc;
+    store: TStore;
+begin
+  store := TStore.Create;
+  store.d1 := 0;
+  store.d2 := 0;
+  p :=
+    TClosureIntf(store);
+ 
+
+  *{\color{red}\bf p.Apply;}*
+end.
+
+     \end{lstlisting}
+   \column{2.2in}
+     \begin{lstlisting}[escapechar=*,basicstyle=\scriptsize]  
+type
+
+  TClosureIntf = interface
+    procedure *{\color{blue}\bf Anonymous}*;
+  end;
+
+  TStore = class(TClosureIntf)
+    d1: Integer;
+    d2: Integer;
+    procedure Anonymous;
+  end
+  
+procedure TStore.Anonymous;
+begin
+  Inc(self.d1);
+  Dec(self.d2);
+end;
+
+     \end{lstlisting}
+
+  \end{columns}
+\end{frame}
+
 
 \begin{frame}[fragile]
   \frametitle{Шаг 2}
