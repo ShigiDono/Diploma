@@ -7,35 +7,7 @@
 \usepackage{color}
 \usepackage{listings,xcolor}
 \usepackage{tikz}
-
-
-\makeatletter
-\newenvironment{btHighlight}[1][]
-{\begingroup\tikzset{bt@Highlight@par/.style={#1}}\begin{lrbox}{\@tempboxa}}
-{\end{lrbox}\bt@HL@box[bt@Highlight@par]{\@tempboxa}\endgroup}
-
-\newcommand\btHL[1][]{%
-  \begin{btHighlight}[#1]\bgroup\aftergroup\bt@HL@endenv%
-}
-\def\bt@HL@endenv{%
-  \end{btHighlight}%   
-  \egroup
-}
-\newcommand{\bt@HL@box}[2][]{%
-  \tikz[#1]{%
-    \pgfpathrectangle{\pgfpoint{1pt}{0pt}}{\pgfpoint{\wd #2}{\ht #2}}%
-    \pgfusepath{use as bounding box}%
-    \node[anchor=base west, fill=orange!30,outer sep=0pt,inner xsep=1pt, inner ysep=0pt, rounded corners=3pt, minimum height=\ht\strutbox+1pt,#1]{\raisebox{1pt}{\strut}\strut\usebox{#2}};
-  }%
-}
-\makeatother
-
-\lstdefinestyle{SQL}{
-    language={SQL},basicstyle=\ttfamily, 
-    moredelim=**[is][\btHL]{`}{`},
-    moredelim=**[is][{\btHL[fill=green!30,draw=red,dashed,thin]}]{@}{@},
-}
-\lstloadlanguages{Pascal, C++}
+\usepackage{pxfonts}
 
 \lstset{
 basicstyle=\ttfamily\footnotesize,
@@ -44,9 +16,10 @@ breaklines=true,
 language=Pascal,
 numbers=left,
 numberstyle=\tiny,
-%columns=fullflexible,
 showstringspaces=false,
 }
+
+
 
 % Стиль презентации
 \usetheme{Warsaw}
@@ -97,7 +70,7 @@ showstringspaces=false,
 
 \end{frame}
 
-\begin{frame}{Freepascal}
+\begin{frame}{Free Pascal}
   \begin{block}{Технические особенности проекта}
     \begin{itemize}
     \item Поддержка большого числа процессоров.
@@ -125,7 +98,7 @@ showstringspaces=false,
 
   \begin{block}{Объявление класса}
 
-\begin{lstlisting}[basicstyle=\scriptsize]
+\begin{lstlisting}[basicstyle=\footnotesize]
 type TAccum = class
  value: Integer;
  constructor Create;
@@ -153,16 +126,16 @@ end;
 
 \begin{lstlisting}
 type
- TAccum=reference to function(n:Integer):Integer;
+  TAccum=reference to function(n:Integer):Integer;
 
 function MakeAccumulator: TAccum;
 var value: Integer;
 begin
- value := 0;
- result := function(n: Integer): Integer begin
-             value  := value + n;
-             result := value;
-           end;
+  value  := 0;
+  result := function(n: Integer): Integer begin
+              value  := value + n;
+              result := value;
+            end;
 end;
 \end{lstlisting}
 
@@ -211,7 +184,7 @@ end;
 
 \begin{frame}[fragile]
   \frametitle{Замыкания}
-  \begin{block}{Пример. Продление жизни локальных переменных.}
+  \begin{block}{Пример: продление жизни локальных переменных}
 \begin{lstlisting}
 function Factory(data: Integer): TProc;
 begin
@@ -325,21 +298,36 @@ end.
   \end{block}
  \begin{block}{Замыкание -- фактический параметр функции}
    \begin{lstlisting}
-  mapContainer.ForEach( procedure(key,val:String)
-                        begin
-                          sum := sum + val;
-                        end );
+  mapContainer.ForEach(
+    procedure(key,val:String) begin
+      sum := sum + val;
+    end );
                          
     \end{lstlisting}
   \end{block}
 \end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Структура компилятора}
+
+ 
+\begin{center}
+\Fontvi
+\begin{changemargin}{-0.5cm}{0cm} 
+  \includegraphics[scale=0.35]{CompilerHightLevel.png}
+\end{changemargin}
+\end{center}
+
+\end{frame}
+
+
 
 % analize capture
 \begin{frame}[fragile]
   \frametitle{Выявление захваченных переменных}
   \begin{columns}[c]
     \column{2.2in}
-      \begin{lstlisting}[escapechar=@,basicstyle=\scriptsize]
+      \begin{lstlisting}[escapechar=@,basicstyle=\footnotesize]
 type 
   TProc = reference to
           procedure;
@@ -367,7 +355,7 @@ end.
   \frametitle{Создание хранилища}
   \begin{columns}[c]
     \column{2.2in}
-     \begin{lstlisting}[escapechar=@,basicstyle=\scriptsize]
+     \begin{lstlisting}[escapechar=@,basicstyle=\footnotesize]
 type
   TProc = reference to
           procedure;
@@ -387,8 +375,9 @@ begin
 end.
      \end{lstlisting}
    \column{2.2in}
-     \begin{lstlisting}[escapechar=@,basicstyle=\scriptsize]  
+     \begin{lstlisting}[escapechar=@,basicstyle=\footnotesize]  
 type
+
 
 
 
@@ -403,7 +392,6 @@ type
 
 
 
-
 //
 
      \end{lstlisting}
@@ -412,10 +400,10 @@ type
 \end{frame}
 
 \begin{frame}[fragile]
-  \frametitle{Перенаправление доступа в исходной функции}
+  \frametitle{Перенаправление доступа}
   \begin{columns}[c]
     \column{2.2in}
-     \begin{lstlisting}[escapechar=@,basicstyle=\scriptsize]
+     \begin{lstlisting}[escapechar=@,basicstyle=\footnotesize]
 type
   TProc = reference to
           procedure;
@@ -435,7 +423,7 @@ begin
 end.
      \end{lstlisting}
    \column{2.2in}
-     \begin{lstlisting}[escapechar=@,basicstyle=\scriptsize]  
+     \begin{lstlisting}[escapechar=@,basicstyle=\footnotesize]  
 type
 
 
@@ -463,7 +451,7 @@ type
   \frametitle{Модификация анонимной функции}
   \begin{columns}[c]
     \column{2.2in}
-     \begin{lstlisting}[escapechar=@,basicstyle=\scriptsize]
+     \begin{lstlisting}[escapechar=@,basicstyle=\footnotesize]
 type 
   TProc = reference to
           procedure;
@@ -483,7 +471,7 @@ begin
 end.
      \end{lstlisting}
    \column{2.2in}
-     \begin{lstlisting}[escapechar=@,basicstyle=\scriptsize]  
+     \begin{lstlisting}[escapechar=@,basicstyle=\footnotesize]  
 type
 
 
@@ -493,10 +481,10 @@ type
   TStore = class
     d1: Integer;
     d2: Integer;
-    @{\color{red}procedure Anonymous;}@
+    @{\color{red}procedure Anonym;}@
   end
   
-procedure TStore.@{\color{red}Anonymous;}@
+procedure TStore.@{\color{red}Anonym;}@
 begin
   @{\color{blue}\bf Inc(d1);}@
   @{\color{blue}\bf Dec(d2);}@
@@ -509,10 +497,10 @@ end;
 
 % move access inside method
 \begin{frame}[fragile]
-  \frametitle{Перенаправление доступа в анонимной функции}
+  \frametitle{Перенаправление доступа}
   \begin{columns}[c]
     \column{2.2in}
-     \begin{lstlisting}[escapechar=@,basicstyle=\scriptsize]
+     \begin{lstlisting}[escapechar=@,basicstyle=\footnotesize]
 type 
   TProc = reference to
           procedure;
@@ -532,7 +520,7 @@ begin
 end.
      \end{lstlisting}
    \column{2.2in}
-     \begin{lstlisting}[escapechar=@,basicstyle=\scriptsize]  
+     \begin{lstlisting}[escapechar=@,basicstyle=\footnotesize]  
 type
 
 
@@ -542,10 +530,10 @@ type
   TStore = class
     d1: Integer;
     d2: Integer;
-    procedure Anonymous;
+    procedure Anonym;
   end
   
-procedure TStore.Anonymous;
+procedure TStore.Anonym;
 begin
   Inc(@{\color{red}\bf self}@.d1);
   Dec(@{\color{red}\bf self}@.d2);
@@ -561,7 +549,7 @@ end;
   \frametitle{Замыкание -- указатель на метод?}
   \begin{columns}[c]
     \column{2.2in}
-     \begin{lstlisting}[escapechar=*,basicstyle=\scriptsize]
+     \begin{lstlisting}[escapechar=*,basicstyle=\footnotesize]
 type
   TProc = *{\color{red}\bf procedure of object;}*
 
@@ -573,7 +561,7 @@ begin
   store := TStore.Create;
   store.d1 := 0;
   store.d2 := 0;
-  p := *{\color{red}\bf @store.Anonymous}*;
+  p := *{\color{red}\bf @store.Anonym}*;
 
 
 
@@ -581,7 +569,7 @@ begin
 end.
      \end{lstlisting}
    \column{2.2in}
-     \begin{lstlisting}[escapechar=@,basicstyle=\scriptsize]  
+     \begin{lstlisting}[escapechar=@,basicstyle=\footnotesize]  
 type
 
 
@@ -591,10 +579,10 @@ type
   TStore = class
     d1: Integer;
     d2: Integer;
-    procedure Anonymous;
+    procedure Anonym;
   end
   
-procedure TStore.Anonymous;
+procedure TStore.Anonym;
 begin
   Inc(self.d1);
   Dec(self.d2);
@@ -610,7 +598,7 @@ end;
   \frametitle{Замыкание -- указатель на интерфейс}
   \begin{columns}[c]
     \column{2.2in}
-     \begin{lstlisting}[escapechar=*,basicstyle=\scriptsize]
+     \begin{lstlisting}[escapechar=*,basicstyle=\footnotesize]
 type
   TProc = reference to
           procedure;
@@ -622,7 +610,7 @@ begin
   store := TStore.Create;
   store.d1 := 0;
   store.d2 := 0;
-  p := @store.Anonymous;
+  p := @store.Anonym;
 
 
 
@@ -630,20 +618,20 @@ begin
 end.
      \end{lstlisting}
    \column{2.2in}
-     \begin{lstlisting}[escapechar=*,basicstyle=\scriptsize]  
+     \begin{lstlisting}[escapechar=*,basicstyle=\footnotesize]  
 type
-
   *{\color{red}\bf TClosureIntf}* = interface
-    procedure *{\color{blue}\bf Anonymous}*;
+    procedure *{\color{blue}\bf Anonym}*;
   end;
 
-  TStore = class(TClosureIntf)
+  TStore =
+   class(TClosureIntf)
     d1: Integer;
     d2: Integer;
-    procedure *{\color{blue}\bf Anonymous}*;
+    procedure *{\color{blue}\bf Anonym}*;
   end
   
-procedure TStore.Anonymous;
+procedure TStore.Anonym;
 begin
   Inc(self.d1);
   Dec(self.d2);
@@ -659,7 +647,7 @@ end;
   \frametitle{Вызов замыкания}
   \begin{columns}[c]
     \column{2.2in}
-     \begin{lstlisting}[escapechar=*,basicstyle=\scriptsize]
+     \begin{lstlisting}[escapechar=*,basicstyle=\footnotesize]
 type 
   TProc = interface
     procedure *{\color{blue}\bf Apply}*;
@@ -680,20 +668,20 @@ end.
 
      \end{lstlisting}
    \column{2.2in}
-     \begin{lstlisting}[escapechar=*,basicstyle=\scriptsize]  
+     \begin{lstlisting}[escapechar=*,basicstyle=\footnotesize]  
 type
-
   TClosureIntf = interface
-    procedure *{\color{blue}\bf Anonymous}*;
+    procedure *{\color{blue}\bf Anonym}*;
   end;
 
-  TStore = class(TClosureIntf)
+  TStore =
+   class(TClosureIntf)
     d1: Integer;
     d2: Integer;
-    procedure Anonymous;
+    procedure Anonym;
   end
   
-procedure TStore.Anonymous;
+procedure TStore.Anonym;
 begin
   Inc(self.d1);
   Dec(self.d2);
@@ -704,36 +692,39 @@ end;
   \end{columns}
 \end{frame}
 
-
-\begin{frame}[fragile]
-  \frametitle{Шаг 2}
- \begin{block}{Создание объекта}
-   \begin{lstlisting}
-var
-  p : procedure of object;
-  frameObj: TFrameObject;
-
-begin
-  frameObj := TFrameObject.Create;
-
-  frameObj.i := 10;
-  p := @frameObj.Proc;
-  p();
-end.
-   \end{lstlisting}
- \end{block} 
-\end{frame}
-
 \begin{frame}{Итог}
    \begin{block}{Проделанная работа}
      \begin{itemize}
      \item Изучена предметная область.
-     \item Изучено внутреннее устройство компилятора fpc.
-     \item Проделана пробная реализация. Предоставленный разработчикам
-       патч содержит 1255 добавленных строк кода, 812 удалённых строк.
-Так же добавлено 20 тестов общим объёмом 504 строки.
+     \item Создана реализация замыканий для компилятора Free~Pascal.
      \end{itemize}
    \end{block} 
 \end{frame}
 
+\begin{frame}[fragile]
+  \frametitle{Сложности с большим уровнем вложенности}
+ \begin{block}{Создание объекта}
+   \begin{lstlisting}
+type
+  TProc = reference to procedure;
+  TFactory = reference to function: TProc;
+  
+function ProduceFactory: TFactory;
+var
+  data: Integer=0;
+begin
+  result := function: TProc
+            begin
+              result := procedure
+                        begin
+                          Inc(data);
+                        end;
+            end;
+end;
+   \end{lstlisting}
+ \end{block} 
+\end{frame}
+
+
 \end{document}
+
