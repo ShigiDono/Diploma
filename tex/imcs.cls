@@ -90,7 +90,7 @@
             \small
             \superunder{\hrulefill}{\hspace{1cm}(подпись)\hspace{1cm}}\hfill\superunder{\small\@mentorname}{\hspace{0.5cm}(и.о.ф)}\\
             &
-            <<\rule{1cm}{0.5pt}>>\rule{2.5cm}{0.5pt}\quad 2013г.\\
+            <<\rule{1cm}{0.5pt}>>\rule{2.5cm}{0.5pt}\quad \@year г.\\
             &\\
             \small
             Защищена в ГАК с оценкой \rule{3cm}{0.5pt} 
@@ -103,8 +103,8 @@
                 \superunder{\hrulefill}{\hspace{1cm}(подпись)\hspace{1cm}} \hfill
                 \superunder{\smallА.~Ю.~Чеботарев}{\hspace{0.5cm}(и.о.ф.)}\\
             \small
-            <<\rule{1cm}{0.5pt}>>\rule{3cm}{0.5pt}\quad 2013 г. 
-                & \small <<\rule{1cm}{0.5pt}>>\rule{2.5cm}{0.5pt}\quad 2013 г.
+            <<\rule{1cm}{0.5pt}>>\rule{3cm}{0.5pt}\quad \@year г. 
+                & \small <<\rule{1cm}{0.5pt}>>\rule{2.5cm}{0.5pt}\quad \@year г.
         \end{tabular}
         \vfill
         \centerline{\footnotesize г. Владивосток}
